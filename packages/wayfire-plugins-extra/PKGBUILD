@@ -40,6 +40,7 @@ sha256sums=('5ce8b800aa710957bd50e0ab08a48d14e317b941f5149eb66820dc78adcb0e9e')
 # makedepend. wayfire headers come from the wayfire package built first.
 build() {
   arch-meson "${pkgname}-${pkgver}" build \
+    --wrap-mode=default \
     -Denable_wayfire_shadows=true \
     -Denable_focus_request=true \
     -Denable_pixdecor=true \
