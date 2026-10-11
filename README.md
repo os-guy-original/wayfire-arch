@@ -9,11 +9,15 @@ latest **stable** Wayfire builds that are internally consistent.
 A matched set built from the highest version tag common to all three
 version-locked projects:
 
-- `wayfire` (0.11.0)
-- `wf-config` (0.11.0)
-- `wayfire-plugins-extra` (0.11.0)
+- `wayfire`
+- `wf-config`
+- `wayfire-plugins-extra`
 
-`wlroots0.20` comes from Arch's official `extra` repo, so it is not rebuilt here.
+All three are pinned to one target version, which CI resolves from the shared
+tag ladder and records in `versions.json`. That file tracks the current target.
+
+`wlroots` comes from Arch's official `extra` repo (the major version Wayfire's
+core targets, currently `wlroots0.20`), so it is not rebuilt here.
 
 Why a matched set: Wayfire's three repos do not tag on a clean ladder (Wayfire
 has `v0.10.1`, but `wf-config` and `wayfire-plugins-extra` jump `0.10.0 ->
@@ -76,4 +80,5 @@ wayfire-arch.conf          the pacman.conf snippet users paste
   separate track rebuilt whenever the Wayfire ABI moves, not on this version
   schedule.
 - A future Wayfire MAJOR bump may need a wlroots version Arch does not ship in
-  `extra`. That would require adding a wlroots build. At 0.11 this is a non-issue.
+  `extra`. That would require adding a wlroots build. At the current target this
+  is a non-issue.
