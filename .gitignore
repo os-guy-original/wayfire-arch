@@ -3,9 +3,11 @@ packages/*/pkg/
 packages/*/src/
 packages/*/*.pkg.tar.zst
 packages/*/*.log
+packages/*/*.sig
+packages/*/*.tar.gz
 packages/*/PKGBUILD.bak
-*.tar.gz
-*.sig
+
+# The served repo tree (x86_64/) IS tracked, including its .db.tar.gz and .sig.
 
 __pycache__/
 *.pyc

@@ -6,6 +6,7 @@ pkgdesc='Library for managing configuration files, used by Wayfire'
 arch=(x86_64)
 url='https://github.com/WayfireWM/wf-config'
 license=(MIT)
+options=('!debug')
 depends=(
   glibc
   libevdev

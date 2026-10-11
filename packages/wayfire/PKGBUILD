@@ -6,6 +6,7 @@ pkgdesc='3D wayland compositor'
 arch=(x86_64)
 url='https://github.com/WayfireWM/wayfire'
 license=(MIT)
+options=('!debug')
 depends=(
   cairo
   glib2
@@ -22,27 +23,41 @@ depends=(
   systemd-libs
   wayland
   wayland-protocols
-  wf-config>=0.11.0
+  'wf-config>=0.11.0'
   wlroots0.20
   xorg-xwayland
   yyjson
 )
 makedepends=(
+  doctest
   git
+  glm
   libxml2
   meson
   ninja
   wayland-protocols
 )
-source=("https://github.com/WayfireWM/wayfire/archive/refs/tags/v${pkgver}.tar.gz")
-# CI regenerates this with `updpkgsums` before each build.
+# Built from git because wf-json, wf-utils and wf-touch are git submodules (the
+# GitHub tarball ships them empty, which breaks meson).
+source=('git+https://github.com/WayfireWM/wayfire.git#tag=v${pkgver}')
 sha256sums=('SKIP')
 
-# Ride Arch's wf-config and wlroots0.20 instead of building them as subprojects.
+prepare() {
+  cd "$srcdir/wayfire"
+  git submodule init
+  # wf-config and wlroots come from the system; skip their submodules (and the
+  # vulkan wlroots fork) so we do not pull them in.
+  git config submodule.subprojects/wf-config.update none
+  git config submodule.subprojects/wlroots.update none
+  git config submodule.subprojects/wlroots-vkfx.update none
+  git submodule update
+}
+
 # vulkan_effects stays at its default (false), which links upstream wlroots0.20
 # rather than the wlroots-vkfx fork.
 build() {
-  arch-meson "${pkgname}-${pkgver}" build \
+  cd "$srcdir/wayfire"
+  arch-meson build \
     -Duse_system_wfconfig=enabled \
     -Duse_system_wlroots=enabled \
     -Dxwayland=enabled \
@@ -51,5 +66,6 @@ build() {
 }
 
 package() {
+  cd "$srcdir/wayfire"
   DESTDIR="${pkgdir}" meson install -C build
 }

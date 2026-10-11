@@ -20,5 +20,13 @@ fi
 rm -f "$pkgsdir/$name".db "$pkgsdir/$name".db.* "$pkgsdir/$name".files "$pkgsdir/$name".files.*
 repo-add "${sign_args[@]}" "$pkgsdir/$name.db.tar.gz" "$pkgsdir"/*.pkg.tar.zst
 
+# repo-add leaves the db/files entries as symlinks into the .tar.gz files. A
+# static host (GitHub Pages) may not follow them, so materialise real files.
+find "$pkgsdir" -maxdepth 1 -type l | while read -r link; do
+  tgt="$(readlink "$link")"
+  rm -f "$link"
+  cp -f "$pkgsdir/$tgt" "$link"
+done
+
 echo "--- sha256 of published packages ---"
 ( cd "$pkgsdir" && sha256sum -- *.pkg.tar.zst )

@@ -6,14 +6,15 @@ pkgdesc='Additional plugins for Wayfire'
 arch=(x86_64)
 url='https://wayfire.org'
 license=(MIT)
+options=('!debug')
 depends=(
   cairo
   glibmm
   iio-sensor-proxy
   libevdev
   librsvg
-  wayfire>=0.11.0
-  wf-config>=0.11.0
+  'wayfire>=0.11.0'
+  'wf-config>=0.11.0'
 )
 conflicts=(
   wayfire-plugins-focus-request
