@@ -28,7 +28,7 @@ jobs:
           pacman-key --populate archlinux
           pacman -Sy --noconfirm --needed \
             base-devel git shadow github-cli pacman-contrib \
-            meson ninja doctest \
+            meson ninja doctest cmake \
             cairo glib2 libevdev libxml2 libinput libglvnd libjpeg-turbo \
             libpng libxcb libxkbcommon pango pixman python systemd-libs \
             wayland wayland-protocols yyjson xorg-xwayland \

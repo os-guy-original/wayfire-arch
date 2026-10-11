@@ -23,6 +23,7 @@ conflicts=(
 )
 makedepends=(
   boost
+  cmake
   git
   glm
   meson
