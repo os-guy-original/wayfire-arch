@@ -32,7 +32,7 @@ makedepends=(
 )
 source=("https://github.com/WayfireWM/wayfire-plugins-extra/archive/refs/tags/v${pkgver}.tar.gz")
 # CI regenerates this with `updpkgsums` before each build.
-sha256sums=('SKIP')
+sha256sums=('5ce8b800aa710957bd50e0ab08a48d14e317b941f5149eb66820dc78adcb0e9e')
 
 # The four third-party plugins (wayfire-shadows, pixdecor, filters, focus-request)
 # are behind meson options that default to false, so the base build pulls no

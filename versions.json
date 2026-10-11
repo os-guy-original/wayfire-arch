@@ -1,5 +1,9 @@
 {
   "target_version": "0.11.0",
-  "pkgrel": 0,
-  "sources": {}
+  "pkgrel": 1,
+  "sources": {
+    "wf-config": "85cca14ac889b2f8bbd53569d9751ed2e8f5c079",
+    "wayfire": "d39902379c5737eebe1dc3a830659fa3f0fa22e0",
+    "wayfire-plugins-extra": "8a3c69c9a6b23eccf95eb55c121db745ac420617"
+  }
 }

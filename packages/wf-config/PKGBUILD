@@ -18,7 +18,7 @@ makedepends=(
 )
 source=("https://github.com/WayfireWM/wf-config/archive/refs/tags/v${pkgver}.tar.gz")
 # CI regenerates this with `updpkgsums` before each build.
-sha256sums=('SKIP')
+sha256sums=('bdccae471c079cdccf4e8fed28622a3b1f04db09349fa0e4fa52b335e815f8d0')
 
 build() {
   arch-meson "${pkgname}-${pkgver}" build -Dtests=disabled
