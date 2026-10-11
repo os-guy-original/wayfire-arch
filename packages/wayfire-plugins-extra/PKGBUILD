@@ -23,6 +23,7 @@ conflicts=(
 )
 makedepends=(
   boost
+  git
   glm
   meson
   ninja
@@ -34,11 +35,15 @@ source=("https://github.com/WayfireWM/wayfire-plugins-extra/archive/refs/tags/v$
 # CI regenerates this with `updpkgsums` before each build.
 sha256sums=('5ce8b800aa710957bd50e0ab08a48d14e317b941f5149eb66820dc78adcb0e9e')
 
-# The four third-party plugins (wayfire-shadows, pixdecor, filters, focus-request)
-# are behind meson options that default to false, so the base build pulls no
-# subprojects. wayfire headers come from the wayfire package built first.
+# Build the four third-party plugins too (wayfire-shadows, pixdecor, filters,
+# focus-request). They are git subprojects pulled at build time, hence the git
+# makedepend. wayfire headers come from the wayfire package built first.
 build() {
-  arch-meson "${pkgname}-${pkgver}" build
+  arch-meson "${pkgname}-${pkgver}" build \
+    -Denable_wayfire_shadows=true \
+    -Denable_focus_request=true \
+    -Denable_pixdecor=true \
+    -Denable_filters=true
   meson compile -C build
 }
 
