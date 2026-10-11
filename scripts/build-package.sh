@@ -14,7 +14,8 @@ VERSIONS_JSON="$ROOT/versions.json"
 
 # Cache downloaded sources and VCS clones outside the repo, otherwise makepkg's
 # git clone (e.g. wayfire) lands in packages/<pkg>/wayfire and gets committed.
-export SRCDEST="$(mktemp -d)"
+SRCDEST="$(mktemp -d)"
+export SRCDEST
 
 dir="$ROOT/packages/${pkg}"
 [[ -f "$dir/PKGBUILD" ]] || { echo "no PKGBUILD in $dir" >&2; exit 1; }

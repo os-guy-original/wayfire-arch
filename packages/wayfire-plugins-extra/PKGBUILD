@@ -40,6 +40,29 @@ sha256sums=('5ce8b800aa710957bd50e0ab08a48d14e317b941f5149eb66820dc78adcb0e9e')
 # focus-request). They are git subprojects pulled at build time, hence the git
 # makedepend. wayfire headers come from the wayfire package built first.
 build() {
+  # The four third-party plugins are tracked as `revision = HEAD` upstream. Pin
+  # them to known-good commits (the state the last green build produced) so the
+  # CI cannot silently pull a compromised/moved master and sign it under our
+  # key. Bump deliberately after review. Fail loud if a wrap is missing/unpinned.
+  local subd="${pkgname}-${pkgver}/subprojects"
+  declare -A pins=(
+    [wayfire-shadows]=4bfdbbf1abe40519183b9a1e1648a732bc656f13
+    [pixdecor]=222e61d971b045a821cf212a6e221367c05d966b
+    [filters]=ecfe09aa87e812cd11c13eff60414c106d5accef
+    [focus-request]=b5c5029f1a695bcd79e2fa0de615cd8028f64f62
+  )
+  for w in "${!pins[@]}"; do
+    [ -f "$subd/$w.wrap" ] || { echo "missing $subd/$w.wrap" >&2; return 1; }
+    sed -i -E "s#revision[[:space:]]*=[[:space:]]*HEAD#revision = ${pins[$w]}#" "$subd/$w.wrap"
+    # Drop shallow depth so checking out a specific SHA works on every host
+    # (some, like GitLab, refuse shallow fetch-by-SHA). These repos are tiny.
+    sed -i -E '/^[[:space:]]*depth[[:space:]]*=/d' "$subd/$w.wrap"
+  done
+  if grep -qE 'revision[[:space:]]*=[[:space:]]*HEAD' "$subd"/*.wrap; then
+    echo "a subproject wrap is still unpinned (revision = HEAD)" >&2
+    return 1
+  fi
+
   arch-meson "${pkgname}-${pkgver}" build \
     --wrap-mode=default \
     -Denable_wayfire_shadows=true \
