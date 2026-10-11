@@ -1,6 +1,7 @@
 # makepkg build byproducts (only PKGBUILD is tracked per package)
 packages/*/pkg/
 packages/*/src/
+packages/*/wayfire/
 packages/*/*.pkg.tar.zst
 packages/*/*.log
 packages/*/*.sig

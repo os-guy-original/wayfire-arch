@@ -12,6 +12,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 VERSIONS_JSON="$ROOT/versions.json"
 
+# Cache downloaded sources and VCS clones outside the repo, otherwise makepkg's
+# git clone (e.g. wayfire) lands in packages/<pkg>/wayfire and gets committed.
+export SRCDEST="$(mktemp -d)"
+
 dir="$ROOT/packages/${pkg}"
 [[ -f "$dir/PKGBUILD" ]] || { echo "no PKGBUILD in $dir" >&2; exit 1; }
 
