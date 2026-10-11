@@ -75,11 +75,13 @@ wayfire-arch.conf          the pacman.conf snippet (goes near the top)
 
 ## Notes and limits
 
-- Only the base plugin set builds. The four third-party plugins
-  (`wayfire-shadows`, `pixdecor`, `filters`, `focus-request`) are pinned to
-  `HEAD` upstream and are behind meson options that default to off. Add them as a
-  separate track rebuilt whenever the Wayfire ABI moves, not on this version
-  schedule.
+- `wayfire-plugins-extra` builds the full plugin set, including the four extra
+  plugins (`winshadows`, `pixdecor`, `filters`, `focus-request`). Those come
+  from third-party upstream HEAD subprojects, so they are re-fetched on every
+  build and are not version-pinned like the core stack.
+- `vulkan_effects` (blur and other Vulkan effects) is off: it needs the
+  `wlroots-vkfx` fork, while we ship Arch's `wlroots0.20`. Enabling it means
+  building wlroots too.
 - A future Wayfire MAJOR bump may need a wlroots version Arch does not ship in
   `extra`. That would require adding a wlroots build. At the current target this
   is a non-issue.
