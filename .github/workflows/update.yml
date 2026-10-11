@@ -1,7 +1,12 @@
 name: update
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild even if the resolved version is unchanged'
+        type: boolean
+        default: false
   schedule:
     - cron: '17 6 * * 1'   # weekly, Mondays 06:17 UTC
 
@@ -64,7 +69,12 @@ jobs:
         run: |
           cd "$GITHUB_WORKSPACE"
           bash scripts/resolve-versions.sh > /tmp/desired.json
-          python scripts/sync-versions.py /tmp/desired.json versions.json >> "$GITHUB_OUTPUT"
+          python scripts/sync-versions.py /tmp/desired.json versions.json > /tmp/sync.out
+          # A manual force dispatch rebuilds even when nothing changed.
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            sed -i 's/^changed=.*/changed=true/' /tmp/sync.out
+          fi
+          cat /tmp/sync.out >> "$GITHUB_OUTPUT"
 
       - name: Build the matched set
         if: steps.resolve.outputs.changed == 'true'

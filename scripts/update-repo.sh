@@ -20,6 +20,15 @@ fi
 rm -f "$pkgsdir/$name".db "$pkgsdir/$name".db.* "$pkgsdir/$name".files "$pkgsdir/$name".files.*
 repo-add "${sign_args[@]}" "$pkgsdir/$name.db.tar.gz" "$pkgsdir"/*.pkg.tar.zst
 
+# Sign each package so `SigLevel = Required` can fetch <pkg>.pkg.tar.zst.sig.
+# pacman.conf(5): Required demands a per-package signature, not just the db.
+if [[ "${REPO_SIGN:-0}" == "1" ]]; then
+  for pkg in "$pkgsdir"/*.pkg.tar.zst; do
+    gpg --batch --yes --pinentry-mode loopback \
+      ${GPGKEY:+--local-user "$GPGKEY"} --detach-sign "$pkg"
+  done
+fi
+
 # repo-add leaves the db/files entries as symlinks into the .tar.gz files. A
 # static host (GitHub Pages) may not follow them, so materialise real files.
 find "$pkgsdir" -maxdepth 1 -type l | while read -r link; do
