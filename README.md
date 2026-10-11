@@ -42,11 +42,12 @@ curl -sSL https://os-guy-original.github.io/wayfire-arch/install.sh | sudo sh
 sudo pacman -S wayfire wayfire-plugins-extra
 ```
 
-Manual alternative (no script): import the key, then add the stanza from
-`wayfire-arch.conf` to `/etc/pacman.conf`. Users who prefer the Chaotic-AUR
-layout can drop the snippet into `/etc/pacman.conf.d/` instead, but pacman does
-not auto-glob that dir, so the `[wayfire-arch]` header has to live in
-`/etc/pacman.conf` either way.
+Manual alternative (no script): import the key, then put the stanza from
+`wayfire-arch.conf` near the top of `/etc/pacman.conf`, right after `[options]`
+and ABOVE `[system]`/`[world]`/`[galaxy]`/`[extra]`/`[chaotic-aur]`. Repo order
+is what decides the source for the same package name, so `wayfire-arch` has to
+sit before the repos that ship their own `wayfire`, or `pacman -S wayfire` pulls
+theirs (for example `galaxy`'s stale `wayfire-plugins-extra`).
 
 ## How CI keeps it fresh
 
@@ -69,7 +70,7 @@ packages/<name>/PKGBUILD   One PKGBUILD per package (pkgver is bumped by CI)
 scripts/                   resolve-versions, build-package, update-repo
 x86_64/                    the served pacman repo (db + .pkg.tar.zst)
 versions.json              the currently built target version
-wayfire-arch.conf          the pacman.conf snippet users paste
+wayfire-arch.conf          the pacman.conf snippet (goes near the top)
 ```
 
 ## Notes and limits
