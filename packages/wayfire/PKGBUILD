@@ -39,7 +39,7 @@ makedepends=(
 )
 # Built from git because wf-json, wf-utils and wf-touch are git submodules (the
 # GitHub tarball ships them empty, which breaks meson).
-source=('git+https://github.com/WayfireWM/wayfire.git#tag=v${pkgver}')
+source=("git+https://github.com/WayfireWM/wayfire.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 prepare() {
