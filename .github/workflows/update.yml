@@ -1,0 +1,107 @@
+name: update
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '17 6 * * 1'   # weekly, Mondays 06:17 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-update
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install tooling and build deps
+        run: |
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman -Sy --noconfirm --needed \
+            base-devel git shadow github-cli pacman-contrib \
+            meson ninja \
+            cairo glib2 libevdev libxml2 libinput libglvnd libjpeg-turbo \
+            libpng libxcb libxkbcommon pango pixman python systemd-libs \
+            wayland wayland-protocols yyjson xorg-xwayland \
+            iio-sensor-proxy librsvg glibmm boost nlohmann-json glm \
+            vulkan-headers wlroots0.20
+
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - uses: actions/checkout@v4
+
+      - name: Fix ownership for the build user
+        run: chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Import signing key (if configured)
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [[ -n "$GPG_PRIVATE_KEY" ]]; then
+            echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+            GPGKEY="$(gpg --list-secret-keys --with-colons | awk -F: '/^sec:/{print $5; exit}')"
+            echo "REPO_SIGN=1" >> "$GITHUB_ENV"
+            echo "GPGKEY=$GPGKEY" >> "$GITHUB_ENV"
+          else
+            echo "No GPG_PRIVATE_KEY secret set, the db will be unsigned." >&2
+          fi
+
+      # Step 1/2: resolve the desired state, then compare against what is
+      # already built. sync-versions.py updates versions.json and prints the
+      # changed / TARGET step outputs.
+      - name: Resolve and compare versions
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_OUTPUT: $GITHUB_OUTPUT
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          bash scripts/resolve-versions.sh > /tmp/desired.json
+          python scripts/sync-versions.py /tmp/desired.json versions.json >> "$GITHUB_OUTPUT"
+
+      - name: Build the matched set
+        if: steps.resolve.outputs.changed == 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          # Build in dependency order and install each artifact so the next
+          # package can resolve it. Version/pkgrel are read from versions.json.
+          for pkg in wf-config wayfire wayfire-plugins-extra; do
+            echo "::group::build $pkg"
+            runuser -u builder -- bash scripts/build-package.sh "$pkg"
+            pacman -U --noconfirm "packages/$pkg"/*.pkg.tar.zst
+            echo "::endgroup::"
+          done
+
+      - name: Assemble and sign the repo db
+        if: steps.resolve.outputs.changed == 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p x86_64
+          # Step 6: collect the freshly built packages into the served arch dir.
+          for f in packages/*/*.pkg.tar.zst; do cp "$f" x86_64/; done
+          REPO_SIGN="${REPO_SIGN:-0}" bash scripts/update-repo.sh x86_64
+
+      - name: Publish back to the repo
+        if: steps.resolve.outputs.changed == 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name  'wayfire-arch-bot'
+          git config user.email 'wayfire-arch-bot@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to publish."
+          else
+            git commit -m "Update to wayfire stack ${{ steps.resolve.outputs.TARGET }}"
+            git push
+          fi
+
+      - name: Report up to date
+        if: steps.resolve.outputs.changed == 'false'
+        run: echo "Target unchanged, nothing to build."

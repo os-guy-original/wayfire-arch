@@ -1,0 +1,29 @@
+# Maintainer: os-guy-original
+pkgname=wf-config
+pkgver=0.11.0
+pkgrel=1
+pkgdesc='Library for managing configuration files, used by Wayfire'
+arch=(x86_64)
+url='https://github.com/WayfireWM/wf-config'
+license=(MIT)
+depends=(
+  glibc
+  libevdev
+  libxml2
+)
+makedepends=(
+  meson
+  ninja
+)
+source=("https://github.com/WayfireWM/wf-config/archive/refs/tags/v${pkgver}.tar.gz")
+# CI regenerates this with `updpkgsums` before each build.
+sha256sums=('SKIP')
+
+build() {
+  arch-meson "${pkgname}-${pkgver}" build -Dtests=disabled
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build
+}

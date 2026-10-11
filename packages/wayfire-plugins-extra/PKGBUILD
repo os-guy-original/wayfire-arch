@@ -1,0 +1,46 @@
+# Maintainer: os-guy-original
+pkgname=wayfire-plugins-extra
+pkgver=0.11.0
+pkgrel=1
+pkgdesc='Additional plugins for Wayfire'
+arch=(x86_64)
+url='https://wayfire.org'
+license=(MIT)
+depends=(
+  cairo
+  glibmm
+  iio-sensor-proxy
+  libevdev
+  librsvg
+  wayfire>=0.11.0
+  wf-config>=0.11.0
+)
+conflicts=(
+  wayfire-plugins-focus-request
+  wayfire-plugins-windecor
+  wayfire-plugins-shadows-git
+)
+makedepends=(
+  boost
+  glm
+  meson
+  ninja
+  nlohmann-json
+  vulkan-headers
+  wayland-protocols
+)
+source=("https://github.com/WayfireWM/wayfire-plugins-extra/archive/refs/tags/v${pkgver}.tar.gz")
+# CI regenerates this with `updpkgsums` before each build.
+sha256sums=('SKIP')
+
+# The four third-party plugins (wayfire-shadows, pixdecor, filters, focus-request)
+# are behind meson options that default to false, so the base build pulls no
+# subprojects. wayfire headers come from the wayfire package built first.
+build() {
+  arch-meson "${pkgname}-${pkgver}" build
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build
+}

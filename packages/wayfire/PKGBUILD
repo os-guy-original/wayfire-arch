@@ -1,0 +1,55 @@
+# Maintainer: os-guy-original
+pkgname=wayfire
+pkgver=0.11.0
+pkgrel=1
+pkgdesc='3D wayland compositor'
+arch=(x86_64)
+url='https://github.com/WayfireWM/wayfire'
+license=(MIT)
+depends=(
+  cairo
+  glib2
+  libevdev
+  libglvnd
+  libinput
+  libjpeg-turbo
+  libpng
+  libxcb
+  libxkbcommon
+  pango
+  pixman
+  python
+  systemd-libs
+  wayland
+  wayland-protocols
+  wf-config>=0.11.0
+  wlroots0.20
+  xorg-xwayland
+  yyjson
+)
+makedepends=(
+  git
+  libxml2
+  meson
+  ninja
+  wayland-protocols
+)
+source=("https://github.com/WayfireWM/wayfire/archive/refs/tags/v${pkgver}.tar.gz")
+# CI regenerates this with `updpkgsums` before each build.
+sha256sums=('SKIP')
+
+# Ride Arch's wf-config and wlroots0.20 instead of building them as subprojects.
+# vulkan_effects stays at its default (false), which links upstream wlroots0.20
+# rather than the wlroots-vkfx fork.
+build() {
+  arch-meson "${pkgname}-${pkgver}" build \
+    -Duse_system_wfconfig=enabled \
+    -Duse_system_wlroots=enabled \
+    -Dxwayland=enabled \
+    -Dtests=disabled
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build
+}

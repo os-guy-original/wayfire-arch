@@ -1,0 +1,11 @@
+# makepkg build byproducts (only PKGBUILD is tracked per package)
+packages/*/pkg/
+packages/*/src/
+packages/*/*.pkg.tar.zst
+packages/*/*.log
+packages/*/PKGBUILD.bak
+*.tar.gz
+*.sig
+
+__pycache__/
+*.pyc
